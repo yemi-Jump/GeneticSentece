@@ -51,6 +51,10 @@ class Population:
 
 		# sort by highest fitness
 		self.population.sort(key=lambda obj: obj.fitness, reverse=True)
+		self.ADAM = self.population[0]
+		self.EVE = self.population[1]
+		print("Adam:", self.ADAM.convert(self.ADAM.dna))
+		print("Eve:", self.EVE.convert(self.EVE.dna))
 
 		for obj in self.population:
 			print(obj.convert(obj.dna), obj.fitness)
@@ -66,6 +70,16 @@ class Population:
 
 		elif self.population[0].fitness == len(self.target):
 			return self.population[0].convert(self.population[0].dna)
+
+	def next_weak(self):
+
+		if self.population[0].fitness < len(self.target):
+			individual = self.population[999]
+			self.selection()
+			return individual.convert(individual.dna)
+
+		elif self.population[0].fitness == len(self.target):
+			return self.population[999].convert(self.population[999].dna)
 
 
 	def selection(self):
@@ -125,9 +139,14 @@ active = False
 text = ''
 target = ''
 top = ''
+bottom = ''
+adam = ''
+eve = ''
 done = False
+running = True
 
-population = Population(1, target)
+
+population = Population(1000, target)
 while not done:
 	for event in pg.event.get():
 		if event.type == pg.QUIT:
@@ -144,6 +163,8 @@ while not done:
 		if event.type == pg.KEYDOWN:
 			if active:
 				if event.key == pg.K_RETURN:
+					active = False
+					color = color_active if active else color_inactive
 					print(text)
 					target = text
 					population = Population(1000, target)
@@ -154,23 +175,70 @@ while not done:
 					text = text[:-1]
 				else:
 					text += event.unicode
-	top = str(population.next_variation())
-	screen.fill((30, 30, 30))
-	# Render the current text.
-	txt_surface = font.render(text, True, color)
-	# Resize the box if the text is too long.
-	width = max(200, txt_surface.get_width()+10)
-	input_box.w = width
-	# Blit the text.
-	screen.blit(txt_surface, (input_box.x+5, input_box.y+5))
-	title = big_font.render("Genetic Sentence", 1, pg.Color('dodgerblue2'))
-	screen.blit(title, (400, 20))
-	sentence = font.render(("Target: " + target), 1, pg.Color('gold'))
-	screen.blit(sentence, (400, 100))
-	top_sentence = font.render(("test: " + top), 1, pg.Color('lightskyblue3'))
-	screen.blit(top_sentence, (400, 400))
-	# Blit the input_box rect.
-	pg.draw.rect(screen, color, input_box, 2)
 
-	pg.display.flip()
-	clock.tick(30)
+			if event.key == pg.K_p:
+				if active == False:
+					if running == True:
+						running = False
+					elif running == False:
+						running = True
+
+	if not running:
+		pause_text = font.render("PAUSED", 1, pg.Color('red'))
+		screen.blit(pause_text, (950, 20))
+		pg.display.flip()
+		clock.tick(30)
+
+	elif running:
+		top = str(population.next_variation())
+		bottom = str(population.next_weak())
+		generation = str(population.generation)
+		adam = str(population.ADAM.convert(population.ADAM.dna))
+		eve = str(population.EVE.convert(population.EVE.dna))
+
+		screen.fill((30, 30, 30))
+		# Render the current text.
+		txt_surface = font.render(text, True, color)
+		# Resize the box if the text is too long.
+		width = max(200, txt_surface.get_width()+10)
+		input_box.w = width
+		# Blit the text.
+		screen.blit(txt_surface, (input_box.x+5, input_box.y+5))
+		title = big_font.render("Genetic Sentence", 1, pg.Color('dodgerblue2'))
+		screen.blit(title, (400, 20))
+		sentence = font.render(("Target: "), 1, pg.Color('lightskyblue3'))
+		sentence2 = font.render((target), 1, pg.Color('gold'))
+		screen.blit(sentence, (350, 100))
+		screen.blit(sentence2, (427, 100))
+		top_sentence = font.render(("Strongest Child: "), 1, pg.Color('lightskyblue3'))
+		top_sentence2 = font.render((top), 1, pg.Color('gold'))
+		screen.blit(top_sentence, (350, 400))
+		screen.blit(top_sentence2, (525, 400))
+		gen_sent = font.render(("Current Generation: "), 1, pg.Color('lightskyblue3'))
+		gen_sent2 = font.render((generation), 1, pg.Color('gold'))
+		screen.blit(gen_sent, (25, 100))
+		screen.blit(gen_sent2, (245, 100))
+		bottom_sent = font.render(("Weakest Child: "), 1, pg.Color('lightskyblue3'))
+		bottom_sent2 = font.render((bottom), 1, pg.Color('gold'))
+		screen.blit(bottom_sent, (350, 500))
+		screen.blit(bottom_sent2, (510, 500))
+		parents_sent = font.render(("Adam and Eve: "), 1, pg.Color('lightskyblue3'))
+		adam_sent = font.render((adam), 1, pg.Color('gold'))
+		eve_sent = font.render((eve), 1, pg.Color('gold'))
+		screen.blit(parents_sent, (25, 200))
+		screen.blit(adam_sent, (25, 250))
+		screen.blit(eve_sent, (25, 280))
+		# Blit the input_box rect.
+		pg.draw.rect(screen, color, input_box, 2)
+
+		pg.display.flip()
+		clock.tick(30)
+
+# add generation counter /
+# add pause /
+# add weakest child /
+# add median child
+# display adam and eve /
+# add list of all strong children
+# add punctuation
+# let screen get bigger
