@@ -18,8 +18,7 @@ class Individual:
 		chromosome = []
 
 		for i in range(len(target)):
-			genes = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase +
-							string.digits + " "))
+			genes = ''.join(random.choices(string.printable))
 			chromosome.append(genes)
 		return chromosome
 
@@ -60,6 +59,8 @@ class Population:
 			print(obj.convert(obj.dna), obj.fitness)
 
 	def next_variation(self):
+		if len(self.population) < 3:
+			return ''
 		if self.population[0].fitness < len(self.target):
 			self.selection()
 			individual = self.population[0]
@@ -72,7 +73,8 @@ class Population:
 			return self.population[0].convert(self.population[0].dna)
 
 	def next_weak(self):
-
+		if len(self.population) < 3:
+			return ''
 		if self.population[0].fitness < len(self.target):
 			individual = self.population[999]
 			self.selection()
@@ -109,9 +111,8 @@ class Population:
 			individual.fitness = eval_fit(self.target, individual.dna, individual)
 			self.population.append(individual)
 
-		self.generation += 1
+		#self.generation += 1
 		self.population.sort(key=lambda obj: obj.fitness, reverse=True)
-		#store_fit(self.population[0])
 		return self.population
 
 	def mutation(self, gene):
@@ -146,7 +147,7 @@ done = False
 running = True
 
 
-population = Population(1000, target)
+population = Population(2, target)
 while not done:
 	for event in pg.event.get():
 		if event.type == pg.QUIT:
@@ -168,7 +169,6 @@ while not done:
 					print(text)
 					target = text
 					population = Population(1000, target)
-					#population.set_target(target)
 					text = ''
 
 				elif event.key == pg.K_BACKSPACE:
@@ -187,14 +187,18 @@ while not done:
 		pause_text = font.render("PAUSED", 1, pg.Color('red'))
 		screen.blit(pause_text, (950, 20))
 		pg.display.flip()
-		clock.tick(30)
+		clock.tick(60)
 
 	elif running:
 		top = str(population.next_variation())
 		bottom = str(population.next_weak())
-		generation = str(population.generation)
 		adam = str(population.ADAM.convert(population.ADAM.dna))
 		eve = str(population.EVE.convert(population.EVE.dna))
+
+		if population.population[0].fitness < len(population.target):
+			population.generation += 1
+
+		generation = str(population.generation)
 
 		screen.fill((30, 30, 30))
 		# Render the current text.
@@ -206,38 +210,43 @@ while not done:
 		screen.blit(txt_surface, (input_box.x+5, input_box.y+5))
 		title = big_font.render("Genetic Sentence", 1, pg.Color('dodgerblue2'))
 		screen.blit(title, (400, 20))
+
 		sentence = font.render(("Target: "), 1, pg.Color('lightskyblue3'))
 		sentence2 = font.render((target), 1, pg.Color('gold'))
 		screen.blit(sentence, (350, 100))
 		screen.blit(sentence2, (427, 100))
+
 		top_sentence = font.render(("Strongest Child: "), 1, pg.Color('lightskyblue3'))
 		top_sentence2 = font.render((top), 1, pg.Color('gold'))
 		screen.blit(top_sentence, (350, 400))
 		screen.blit(top_sentence2, (525, 400))
+
 		gen_sent = font.render(("Current Generation: "), 1, pg.Color('lightskyblue3'))
 		gen_sent2 = font.render((generation), 1, pg.Color('gold'))
 		screen.blit(gen_sent, (25, 100))
 		screen.blit(gen_sent2, (245, 100))
+
 		bottom_sent = font.render(("Weakest Child: "), 1, pg.Color('lightskyblue3'))
 		bottom_sent2 = font.render((bottom), 1, pg.Color('gold'))
 		screen.blit(bottom_sent, (350, 500))
 		screen.blit(bottom_sent2, (510, 500))
+
 		parents_sent = font.render(("Adam and Eve: "), 1, pg.Color('lightskyblue3'))
 		adam_sent = font.render((adam), 1, pg.Color('gold'))
 		eve_sent = font.render((eve), 1, pg.Color('gold'))
 		screen.blit(parents_sent, (25, 200))
 		screen.blit(adam_sent, (25, 250))
 		screen.blit(eve_sent, (25, 280))
+
 		# Blit the input_box rect.
 		pg.draw.rect(screen, color, input_box, 2)
-
 		pg.display.flip()
-		clock.tick(30)
+		clock.tick(60)
 
+# fix generation skipping /
 # add generation counter /
 # add pause /
 # add weakest child /
-# add median child
 # display adam and eve /
 # add list of all strong children
 # add punctuation
