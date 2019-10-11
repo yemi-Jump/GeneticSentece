@@ -14,3 +14,4 @@ Using genetic algorithms to create sentences
 - [ ] Add list of every fittest individual for every generation
 - [ ] Make program less ugly 
 - [ ] Fix input box to get larger in both directions and readjust text  
+- [ ] Add sliders for mutation rate and population size
