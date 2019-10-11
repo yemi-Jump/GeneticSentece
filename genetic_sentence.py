@@ -118,8 +118,7 @@ class Population:
 	def mutation(self, gene):
 		mutation_rate = .03
 		if random.random() < mutation_rate:
-			gene = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase +
-							string.digits + " "))
+			gene = ''.join(random.choices(string.printable))
 		else:
 			pass
 		return gene
@@ -243,11 +242,5 @@ while not done:
 		pg.display.flip()
 		clock.tick(60)
 
-# fix generation skipping /
-# add generation counter /
-# add pause /
-# add weakest child /
-# display adam and eve /
+
 # add list of all strong children
-# add punctuation
-# let screen get bigger
